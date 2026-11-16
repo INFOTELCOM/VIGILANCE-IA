@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07111f">
+  <meta name="description" content="VIGILANCE IA — prototype expérimental d'analyse vidéo assistée par vision par ordinateur et YOLOv8, développé par INFOTELCOM.">
+  <title>VIGILANCE IA — INFOTELCOM</title>
+  <style>
+    :root{color-scheme:dark;--bg:#07111f;--panel:#0d1b2d;--panel2:#10243a;--line:rgba(145,185,220,.16);--text:#edf5ff;--muted:#9db1c8;--blue:#32a7ff;--cyan:#55e2e6;--yellow:#f3c95d}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 75% 0%,rgba(24,104,170,.22),transparent 38%),var(--bg);color:var(--text);font:16px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+    a{color:inherit} .wrap{width:min(1120px,calc(100% - 40px));margin:auto}
+    header{border-bottom:1px solid var(--line);background:rgba(7,17,31,.82);backdrop-filter:blur(14px);position:sticky;top:0;z-index:5}
+    nav{min-height:70px;display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{display:flex;align-items:center;gap:12px;text-decoration:none;font-weight:800;letter-spacing:.12em;font-size:.92rem}
+    .eye{width:36px;height:36px;border:1px solid rgba(85,226,230,.55);border-radius:12px;display:grid;place-items:center;color:var(--cyan);box-shadow:0 0 24px rgba(50,167,255,.16)}
+    .navlinks{display:flex;gap:24px;color:var(--muted);font-size:.9rem}.navlinks a{text-decoration:none}.navlinks a:hover{color:var(--cyan)}
+    .hero{padding:88px 0 72px;display:grid;grid-template-columns:1.12fr .88fr;gap:46px;align-items:center}
+    .eyebrow{color:var(--cyan);text-transform:uppercase;letter-spacing:.2em;font-size:.76rem;font-weight:800}
+    h1{font-size:clamp(2.8rem,6vw,5.5rem);line-height:.98;letter-spacing:-.055em;margin:18px 0 22px}h1 span{color:var(--cyan)}
+    .lead{font-size:1.12rem;color:#b8c9dc;max-width:650px}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:12px 18px;border-radius:11px;text-decoration:none;font-weight:750;border:1px solid var(--line);transition:.2s}
+    .btn.primary{background:linear-gradient(120deg,#087bc8,#16a8b8);border-color:transparent;color:white;box-shadow:0 8px 30px rgba(20,142,194,.22)}.btn:hover{transform:translateY(-2px)}
+    .visual{position:relative;border:1px solid rgba(85,226,230,.25);border-radius:24px;padding:12px;background:linear-gradient(145deg,rgba(20,48,74,.9),rgba(8,20,35,.94));box-shadow:0 28px 90px rgba(0,0,0,.32)}
+    .visual img{width:100%;height:auto;display:block;border-radius:15px;object-fit:cover}.visual .tag{position:absolute;bottom:25px;left:25px;background:rgba(5,14,25,.88);border:1px solid var(--line);padding:8px 12px;border-radius:9px;color:var(--cyan);font-size:.75rem;letter-spacing:.08em}
+    section{padding:62px 0;border-top:1px solid var(--line)}.section-head{max-width:700px;margin-bottom:28px}h2{font-size:clamp(1.8rem,4vw,2.7rem);line-height:1.1;letter-spacing:-.035em;margin:10px 0 12px}.muted{color:var(--muted)}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card{background:linear-gradient(145deg,rgba(16,36,58,.92),rgba(10,25,42,.92));border:1px solid var(--line);border-radius:17px;padding:22px}.ico{font-size:1.45rem}.card h3{margin:12px 0 7px;font-size:1.08rem}.card p{margin:0;color:var(--muted);font-size:.94rem}
+    .status{display:flex;align-items:flex-start;gap:14px;padding:20px;border-radius:15px;background:rgba(243,201,93,.07);border:1px solid rgba(243,201,93,.24)}.dot{width:10px;height:10px;border-radius:50%;background:var(--yellow);margin-top:8px;flex:none;box-shadow:0 0 14px rgba(243,201,93,.6)}
+    .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;counter-reset:step}.step{padding:20px;border-left:2px solid rgba(50,167,255,.55);background:rgba(13,27,45,.65)}.step strong{display:block;color:var(--cyan);font-size:.78rem;letter-spacing:.12em;margin-bottom:7px}
+    .notice{font-size:.9rem;color:#b7c5d5;border:1px solid var(--line);border-radius:14px;padding:18px;background:rgba(13,27,45,.55)}
+    footer{padding:28px 0 42px;color:var(--muted);font-size:.88rem;border-top:1px solid var(--line)}footer .foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+    @media(max-width:800px){.hero{grid-template-columns:1fr;padding:60px 0}.grid,.steps{grid-template-columns:1fr}.navlinks{gap:12px;font-size:.8rem}.navlinks a:nth-child(2){display:none}}
+    @media(max-width:480px){.wrap{width:min(100% - 28px,1120px)}.navlinks a:nth-child(1){display:none}.brand{font-size:.78rem}.hero{padding-top:48px}}
+  </style>
+</head>
+<body>
+<header><nav class="wrap">
+  <a class="brand" href="#top"><span class="eye">◉</span><span>INFOTELCOM <span style="color:var(--cyan)">/</span> VIGILANCE IA</span></a>
+  <div class="navlinks"><a href="#fonctionnalites">Fonctionnalités</a><a href="#demo">Démo</a><a href="#projet">Le projet</a><a href="https://github.com/INFOTELCOM/VIGILANCE-IA">GitHub ↗</a></div>
+</nav></header>
+<main id="top">
+  <div class="wrap hero">
+    <div>
+      <div class="eyebrow">Vision par ordinateur · Prototype IA</div>
+      <h1>Observer.<br><span>Analyser.</span><br>Comprendre.</h1>
+      <p class="lead">VIGILANCE IA est un prototype expérimental d'analyse vidéo assistée par vision par ordinateur. Il s'appuie sur YOLOv8 pour détecter des objets et suivre des personnes dans une séquence vidéo.</p>
+      <div class="actions">
+        <a class="btn primary" href="#demo">Découvrir la démonstration <span>↓</span></a>
+        <a class="btn" href="https://github.com/INFOTELCOM/VIGILANCE-IA">Voir le code source ↗</a>
+      </div>
+    </div>
+    <div class="visual">
+      <img src="../screenshot_834.jpg" alt="Capture d'écran existante du prototype VIGILANCE IA" onerror="this.style.display='none';this.parentElement.style.minHeight='260px';">
+      <div class="tag">PROTOTYPE · YOLOv8</div>
+    </div>
+  </div>
+
+  <section id="fonctionnalites"><div class="wrap">
+    <div class="section-head"><div class="eyebrow">Capacités du prototype</div><h2>Une chaîne d'analyse vidéo expérimentale</h2><p class="muted">Les fonctionnalités présentées correspondent au code actuel du projet. Leur précision et leur portée doivent être évaluées dans des conditions de test adaptées.</p></div>
+    <div class="grid">
+      <article class="card"><div class="ico">▣</div><h3>Détection d'objets</h3><p>Détection de personnes, véhicules et catégories d'objets à partir d'un modèle YOLOv8 pré-entraîné.</p></article>
+      <article class="card"><div class="ico">⌁</div><h3>Suivi visuel</h3><p>Association heuristique des détections entre les images et visualisation des trajectoires estimées.</p></article>
+      <article class="card"><div class="ico">▤</div><h3>Rapport d'analyse</h3><p>Récapitulatif technique du traitement : images traitées, identifiants suivis et comptages par catégories expérimentales.</p></article>
+    </div>
+  </div></section>
+
+  <section id="demo"><div class="wrap">
+    <div class="section-head"><div class="eyebrow">Accès en ligne</div><h2>La vitrine est publique. Le moteur vidéo arrive ensuite.</h2><p class="muted">Cette page est une présentation web statique : elle ne lance pas encore de calcul YOLOv8 dans le navigateur.</p></div>
+    <div class="status"><span class="dot"></span><div><strong>Démo interactive en préparation</strong><div class="muted">L'exécution de l'analyse vidéo nécessite un serveur Python avec les dépendances et les ressources de calcul adaptées. Aucun résultat d'analyse n'est simulé sur cette page.</div></div></div>
+  </div></section>
+
+  <section id="projet"><div class="wrap">
+    <div class="section-head"><div class="eyebrow">À propos</div><h2>Un projet INFOTELCOM</h2><p class="muted">VIGILANCE IA est développé comme un prototype technique autour de la vision par ordinateur, du traitement vidéo et de l'expérimentation de modèles de détection.</p></div>
+    <div class="steps">
+      <div class="step"><strong>01 / TECHNOLOGIE</strong>Python · Gradio · OpenCV · NumPy · Ultralytics YOLOv8</div>
+      <div class="step"><strong>02 / CODE SOURCE</strong>Le dépôt public permet de consulter le code, la documentation et les évolutions du projet.</div>
+      <div class="step"><strong>03 / CONTRIBUTION</strong>Les retours techniques et propositions d'amélioration sont les bienvenus via GitHub.</div>
+    </div>
+    <div class="notice" style="margin-top:22px"><strong>Important — usage responsable.</strong> Ce prototype ne permet pas de déterminer la culpabilité, la dangerosité ou les intentions d'une personne. Les scores et catégories heuristiques sont expérimentaux, peuvent être erronés et ne doivent jamais servir seuls à prendre une décision concernant un individu. Respecter le droit applicable, la vie privée et les règles de protection des données avant tout traitement vidéo.</div>
+  </div></section>
+</main>
+<footer><div class="wrap foot"><span>© INFOTELCOM · VIGILANCE IA</span><span><a href="https://github.com/INFOTELCOM/VIGILANCE-IA">Dépôt GitHub</a> · Prototype expérimental</span></div></footer>
+</body></html>
