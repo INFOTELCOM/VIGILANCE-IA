@@ -1,202 +1,233 @@
-# 👁️ VigilanceAI — Surveillance Comportementale + GPS Réel
+# VIGILANCE IA
 
-Système de surveillance IA complet : détection comportementale, score de menace,
-tracking GPS réel multi-sources, dashboard web et interface Gradio.
+<p align="center">
+<strong>Analyse vidéo assistée par intelligence artificielle</strong><br>
+Détection d'objets · Suivi visuel · Vision par ordinateur
+</p>
 
----
+<p align="center">
+<a href="https://github.com/INFOTELCOM/VIGILANCE-IA">Dépôt GitHub</a> ·
+<a href="https://github.com/INFOTELCOM/VIGILANCE-IA/issues">Signaler un problème</a>
+</p>
 
-## 📁 Structure
+VIGILANCE IA est un projet expérimental de vision par ordinateur développé en **Python**. Il s'appuie principalement sur **YOLOv8** et **OpenCV** pour analyser des vidéos, détecter des personnes et certains objets, suivre des déplacements et produire des annotations visuelles.
 
-```
-vigilance_ai/
-├── detector.py              ← Pipeline principal (webcam/vidéo + Flask)
-├── gps_engine.py            ← Moteur GPS réel multi-sources
-├── app.py                   ← Interface Gradio (Hugging Face Spaces)
-├── requirements.txt         ← Dépendances HuggingFace
-├── requirements_local.txt   ← Dépendances locales
-├── .env.example             ← Template variables d'environnement
-└── README.md
-```
+Deux interfaces sont proposées :
+- **detector.py** : pipeline local pour webcam, fichiers vidéo et flux caméra, avec affichage OpenCV et fonctions de suivi / journalisation.
+- **app.py** : interface web **Gradio** pour téléverser une vidéo, régler les paramètres d'analyse et récupérer une vidéo annotée accompagnée d'un rapport.
 
----
+> **Nature du projet : prototype expérimental.** Les scores et catégories affichés reposent sur des heuristiques simples. Ils ne déterminent pas l'intention d'une personne, ne prouvent aucune infraction et ne doivent jamais servir seuls à prendre une décision concernant un individu. Toute interprétation doit rester sous contrôle humain.
 
-## ⚙️ Installation locale
+## Aperçu
 
-```bash
-python -m venv venv
-venv\Scripts\activate        # Windows
-source venv/bin/activate     # Linux/Mac
+![Capture d'écran de VIGILANCE IA](screenshot_834.jpg)
 
+*Capture du projet. Les résultats varient selon la vidéo, le matériel et les paramètres.*
+
+## Fonctionnalités
+
+### Détection et suivi
+- Détection de personnes par YOLOv8.
+- Détection de certaines catégories d'objets et de véhicules.
+- Suivi visuel entre les images et affichage des trajectoires.
+- Annotations avec identifiants, boîtes de détection et indicateurs.
+
+### Analyse expérimentale
+- Estimation de mouvements simples (marche, course, déplacement rapide).
+- Calcul d'un score heuristique et catégorisation indicative par seuils.
+- Indicateurs de densité de foule et alertes de zone dans le pipeline local.
+
+### Interfaces et données
+- Interface locale OpenCV.
+- Interface web Gradio pour analyser des fichiers vidéo.
+- Fonctions Flask et journalisation dans le pipeline local.
+- Exports JSON / GeoJSON selon les fonctions utilisées.
+
+### Module GPS expérimental
+Le module **gps_engine.py** propose des fonctions de projection image-vers-coordonnées, de géocodage inverse et d'export GeoJSON. Il peut interroger ipinfo.io, OpenStreetMap Nominatim, OpenCage et What3Words.
+
+**Limite importante :** une position issue d'une adresse IP est approximative. La projection de pixels vers le sol dépend de la calibration, de la géométrie et de la position réelle de la caméra. Il ne s'agit pas d'une mesure GPS directe des personnes et ces résultats doivent être validés indépendamment.
+
+## Architecture
+
+~~~text
+VIGILANCE-IA/
+├── app.py                  # Interface Gradio d'analyse vidéo
+├── detector.py             # Pipeline local de détection et suivi
+├── gps_engine.py           # Fonctions expérimentales de géolocalisation
+├── yolov8n.pt              # Poids du modèle YOLOv8 nano
+├── requirements.txt        # Dépendances Gradio / environnement headless
+├── requirements_local.txt  # Dépendances de l'application locale
+├── .env.example            # Exemple de configuration des clés API
+├── README.md               # Documentation principale
+├── README_HF.md            # Métadonnées Hugging Face Spaces
+└── screenshot_834.jpg      # Capture d'écran
+~~~
+
+## Technologies
+
+| Technologie | Utilisation |
+|---|---|
+| Python | Langage principal |
+| YOLOv8 / Ultralytics | Détection d'objets |
+| OpenCV | Traitement et affichage vidéo |
+| NumPy | Calculs numériques |
+| Gradio | Interface web |
+| Flask | Services / dashboard du pipeline local |
+| DeepFace | Dépendance du pipeline local |
+| Requests | Requêtes vers les services externes |
+
+## Prérequis
+
+- **Python 3.10 ou 3.11** recommandé.
+- Git.
+- Webcam, fichier vidéo ou flux caméra pour les tests locaux.
+- Connexion Internet pour installer les dépendances et accéder aux services externes.
+- Windows, Linux ou macOS. Un GPU compatible CUDA peut accélérer l'inférence, mais les performances dépendent du matériel et de la résolution.
+
+Aucun débit d'images par seconde n'est garanti.
+
+## Installation
+
+### 1. Cloner le dépôt
+
+~~~bash
+git clone https://github.com/INFOTELCOM/VIGILANCE-IA.git
+cd VIGILANCE-IA
+~~~
+
+### 2. Créer un environnement virtuel
+
+**Windows — PowerShell**
+
+~~~powershell
+py -3.11 -m venv venv
+.\venv\Scripts\Activate.ps1
+~~~
+
+Si l'activation est bloquée par la politique PowerShell, et si cela est autorisé sur votre poste :
+
+~~~powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\venv\Scripts\Activate.ps1
+~~~
+
+**Linux / macOS**
+
+~~~bash
+python3.11 -m venv venv
+source venv/bin/activate
+~~~
+
+### 3. Installer les dépendances
+
+Pour l'application locale avec affichage OpenCV :
+
+~~~bash
+python -m pip install --upgrade pip
 pip install -r requirements_local.txt
-```
+~~~
 
----
+Pour l'interface Gradio en environnement sans affichage :
 
-## 🔑 APIs GPS gratuites
+~~~bash
+pip install -r requirements.txt
+~~~
 
-| API | Gratuit | Clé requise | Usage |
-|-----|---------|-------------|-------|
-| **ipinfo.io** | ✅ 50k/mois | ❌ Non | Position caméra par IP |
-| **OSM Nominatim** | ✅ Illimité | ❌ Non | Adresse depuis GPS |
-| **OpenCage** | ✅ 2500/jour | ✅ Oui | Geocoding précis |
-| **What3Words** | ✅ Gratuit | ✅ Oui | Adresse en 3 mots |
+Les deux fichiers de dépendances utilisent des variantes OpenCV différentes. Il est préférable de choisir le fichier adapté à l'usage plutôt que d'installer les deux dans le même environnement.
 
-### Obtenir les clés gratuites :
-- **OpenCage** → https://opencagedata.com/ (inscription gratuite)
-- **What3Words** → https://developer.what3words.com/ (inscription gratuite)
+## Démarrage
 
-### Configurer les clés :
-```bash
-# Copier le template
-cp .env.example .env
-# Éditer .env et remplir les clés
-```
+### Interface Gradio
 
-Ou directement en argument :
-```bash
-python detector.py --opencage-key VOTRE_CLE --w3w-key VOTRE_CLE
-```
+~~~bash
+python app.py
+~~~
 
----
+Ouvrez l'adresse locale indiquée dans le terminal (généralement **http://127.0.0.1:7860**), importez une vidéo, ajustez les paramètres puis lancez l'analyse.
 
-## 🚀 Lancement
+### Pipeline local
 
-### Webcam (GPS auto-détecté par IP)
-```bash
+~~~bash
 python detector.py
-```
+~~~
 
-### Vidéo + GPS + clés API
-```bash
-python detector.py \
-  --source video.mp4 \
-  --opencage-key VOTRE_CLE \
-  --w3w-key VOTRE_CLE \
-  --save output.mp4
-```
+Pour connaître les options disponibles dans la version du dépôt :
 
-### Caméra fixe avec position GPS connue (plus précis)
-```bash
-python detector.py \
-  --source rtsp://192.168.1.10:554/stream \
-  --cam-lat 48.8566 \
-  --cam-lon 2.3522 \
-  --cam-alt 6.0 \
-  --cam-fov-h 80.0 \
-  --cam-tilt 50.0
-```
+~~~bash
+python detector.py --help
+~~~
 
-### Test du GPS Engine seul
-```bash
+### Tester le module GPS séparément
+
+~~~bash
 python gps_engine.py
-```
+~~~
+
+Ce test peut effectuer des requêtes vers des services Internet tiers. Leur disponibilité et leurs quotas peuvent évoluer.
+
+## Configuration GPS facultative
+
+Copiez le fichier d'exemple :
+
+**Windows PowerShell**
+~~~powershell
+Copy-Item .env.example .env
+~~~
+
+**Linux / macOS**
+~~~bash
+cp .env.example .env
+~~~
+
+Renseignez les clés nécessaires dans le fichier **.env** :
+
+~~~dotenv
+OPENCAGE_KEY=votre_cle_opencage
+W3W_KEY=votre_cle_what3words
+~~~
+
+Consultez les sites officiels pour connaître les conditions et quotas en vigueur. **Ne publiez jamais votre fichier .env ni vos clés API.**
+
+## Utilisation responsable et confidentialité
+
+Le traitement vidéo peut concerner des personnes identifiables. Avant tout test ou déploiement :
+- utilisez uniquement des vidéos pour lesquelles vous disposez des autorisations nécessaires ;
+- informez les personnes concernées lorsque la réglementation l'exige ;
+- limitez la collecte, les accès, la conservation et le partage des images ;
+- sécurisez les fichiers, journaux et interfaces réseau ;
+- vérifiez les résultats manuellement et documentez les erreurs et biais possibles ;
+- ne prenez aucune décision concernant une personne sur la seule base d'un score ou d'une catégorie générés.
+
+Le projet ne doit pas être utilisé pour profiler, discriminer, sanctionner ou surveiller illégalement des personnes. Tout déploiement réel nécessite une analyse juridique, technique et éthique préalable, notamment au regard du RGPD et des règles applicables à la vidéosurveillance.
+
+## Limites connues
+
+- La qualité des détections dépend de l'éclairage, de l'angle de caméra, de la résolution et des occultations.
+- Le suivi peut perdre ou réattribuer un identifiant lorsque des personnes se croisent ou sortent du champ.
+- Les scores de comportement sont des règles expérimentales, non des modèles validés scientifiquement.
+- La détection d'un objet ne révèle ni son contexte ni l'intention de la personne qui le transporte.
+- La géolocalisation par IP ou projection de pixels est indicative et nécessite une calibration et une validation indépendantes.
+- Ce prototype n'est pas un système certifié de sécurité ou de surveillance.
+
+## Contribuer
+
+Les contributions sont les bienvenues : corrections, documentation, tests, amélioration de la robustesse et signalement de bugs.
+
+1. Forkez le dépôt.
+2. Créez une branche de travail.
+3. Effectuez vos changements et testez-les.
+4. Ouvrez une Pull Request en décrivant le problème et la solution.
+
+Pour signaler un bug, utilisez [GitHub Issues](https://github.com/INFOTELCOM/VIGILANCE-IA/issues). Indiquez votre système, votre version de Python, les étapes de reproduction et les journaux pertinents, sans données personnelles ni clés API.
+
+## Auteur
+
+**VIGILANCE IA** — projet développé par **Mayele**, au sein de l'écosystème **INFOTELCOM**.
+
+- Organisation : [INFOTELCOM](https://github.com/INFOTELCOM)
+- Dépôt : [INFOTELCOM/VIGILANCE-IA](https://github.com/INFOTELCOM/VIGILANCE-IA)
 
 ---
 
-## 🎮 Touches clavier
-
-| Touche | Action |
-|--------|--------|
-| `q` | Quitter |
-| `SPACE` | Pause / Reprise |
-| `s` | Screenshot |
-| `z` | Zone interdite (clic gauche=point, clic droit=fermer) |
-| `d` | Dashboard Flask → http://localhost:5000 |
-| `c` | Effacer zones |
-
----
-
-## 🗺️ GPS Réel — Comment ça marche
-
-### Sans calibration (auto)
-1. **ipinfo.io** détecte la position GPS de la caméra via son IP
-2. La position des personnes est calculée par **projection géométrique**
-   en tenant compte du FOV, de l'altitude et de l'inclinaison
-3. **OSM Nominatim** convertit les coords en adresse réelle
-
-### Avec calibration BEV (précision maximale)
-```python
-from gps_engine import GPSEngine
-
-gps = GPSEngine()
-gps.calibrate_bev(
-    pixel_points=[(100,200), (800,200), (800,700), (100,700)],
-    gps_points=[(48.8567,2.3521), (48.8567,2.3525),
-                (48.8563,2.3525), (48.8563,2.3521)]
-)
-```
-
-### Export GeoJSON (QGIS / Google Earth)
-À la fin de chaque session, un fichier `logs/gps_tracking.json` est généré.
-Il est lisible dans :
-- 🗺️ **QGIS** (import GeoJSON)
-- 🌍 **Google Earth** (import KML/GeoJSON)
-- 🌐 **geojson.io** (visualisation en ligne)
-
----
-
-## 🎯 Fonctionnalités complètes
-
-### Détection & Analyse
-- ✅ Détection personnes YOLOv8
-- ✅ Score de menace 0–100% par individu
-- ✅ Analyse expression faciale (DeepFace)
-- ✅ Analyse posturale (fuite, agitation, surveillance)
-- ✅ Détection objets suspects (couteau, sacs...)
-- ✅ Tracking trajectoires + trainées colorées
-
-### Alertes
-- ✅ Flash rouge si suspect détecté
-- ✅ Alerte zone interdite
-- ✅ Alerte surpopulation (foule)
-- ✅ Identification véhicule de fuite
-
-### GPS Réel
-- ✅ Auto-localisation caméra (ipinfo.io)
-- ✅ Coordonnées GPS par personne en temps réel
-- ✅ Adresse réelle (OSM Nominatim, OpenCage)
-- ✅ Adresse W3W (What3Words)
-- ✅ Export GeoJSON (QGIS/Google Earth)
-- ✅ Calibration BEV 4 points pour précision maximale
-
-### Interfaces
-- ✅ Fenêtre OpenCV locale
-- ✅ Dashboard Flask (http://localhost:5000)
-- ✅ Interface Gradio (Hugging Face)
-- ✅ Logs CSV + JSON complets
-
----
-
-## 🔧 Arguments complets
-
-| Argument | Défaut | Description |
-|----------|--------|-------------|
-| `--source` | `0` | Webcam / fichier / RTSP |
-| `--no-show` | off | Mode headless |
-| `--save` | aucun | Vidéo annotée sortie |
-| `--log-every` | `3` | Logger 1 frame sur N |
-| `--opencage-key` | `` | Clé OpenCage |
-| `--w3w-key` | `` | Clé What3Words |
-| `--cam-lat` | auto | Latitude caméra |
-| `--cam-lon` | auto | Longitude caméra |
-| `--cam-alt` | `8.0` | Altitude caméra (m) |
-| `--cam-fov-h` | `70.0` | FOV horizontal (°) |
-| `--cam-fov-v` | `45.0` | FOV vertical (°) |
-| `--cam-tilt` | `45.0` | Inclinaison (°) |
-
----
-
-## 🌐 Déploiement Hugging Face
-
-Uploader sur HuggingFace Spaces :
-- `app.py`
-- `requirements.txt`
-- `README_HF.md` (renommer en README.md)
-
-Les clés API se configurent dans **Settings → Repository secrets** :
-- `OPENCAGE_KEY`
-- `W3W_KEY`
-
----
-
-*Fait par **Mayele** · YOLOv8 + OpenCV + GPS Réel*
+<p align="center">Python · YOLOv8 · OpenCV · Vision par ordinateur</p>
